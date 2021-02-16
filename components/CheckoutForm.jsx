@@ -1,7 +1,7 @@
 import { useState } from "react";
 import styled from "@emotion/styled";
 import axios from "axios";
-
+import { CardElement } from '@stripe/react-stripe-js';
 import Row from "./prebuilt/Row";
 import BillingDetailsFields from "./prebuilt/BillingDetailsFields";
 import SubmitButton from "./prebuilt/SubmitButton";
@@ -35,7 +35,30 @@ const CheckoutForm = ({ price, onSuccessfulCheckout }) => {
         postal_code: ev.target.zip.value
       }
     };
+    setProcessingTo(true);
+    const { data: clientSecret } = await axios.post('/api/payment_intents', {
+      amount: price * 100
+    });
+
+    console.log(clientSecret);
   };
+
+  const cardElementOptions = {
+    style: {
+      base: {
+        fontSize: '16px',
+        color: '#fff',
+        '::placeholder': {
+          color: '#87bbfd'
+        }
+      },
+      invalid: {
+        color: '#FFC7EE',
+        iconColor: '#FFC7EE'
+      }
+    },
+    hidePostalCode: true,
+  }
 
   return (
     <form onSubmit={handleFormSubmit}>
@@ -43,7 +66,9 @@ const CheckoutForm = ({ price, onSuccessfulCheckout }) => {
         <BillingDetailsFields />
       </Row>
       <Row>
-        <CardElementContainer></CardElementContainer>
+        <CardElementContainer>
+          <CardElement options={cardElementOptions}></CardElement>
+        </CardElementContainer>
       </Row>
       {checkoutError && <CheckoutError>{checkoutError}</CheckoutError>}
       <Row>
